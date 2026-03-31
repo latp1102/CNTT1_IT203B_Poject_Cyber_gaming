@@ -77,15 +77,8 @@ create table transactions (
 -- Index cho tìm kiếm nhanh
 create index idx_transactions_user_id on transactions(user_id);
 create index idx_transactions_created_at on transactions(created_at);
--- Insert sample users
 -- Insert sample PCs
-insert into pcs(
-        pc_number,
-        category_id,
-        configuration,
-        price_per_hour,
-        status
-    )
+insert into pcs(pc_number,category_id,configuration,price_per_hour,status)
 values (
         'PC001',
         1,
@@ -175,15 +168,8 @@ values (
         30000.00,
         15
     );
--- Insert sample bookings (for testing double booking prevention)
-insert into bookings(
-        user_id,
-        pc_id,
-        start_time,
-        end_time,
-        status,
-        total_cost
-    )
+-- Insert sample bookings 
+insert into bookings(user_id,pc_id,start_time,end_time,status,total_cost)
 values (
         3,
         1,
