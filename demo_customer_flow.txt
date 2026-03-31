@@ -1,0 +1,173 @@
+===== DEMO HỆ THỐNG CYBER GAMING - KHÁCH HÀNG =====
+
+1. KHỞI ĐỘNG ỨNG DỤNG
+   java org.example.cybergaming.presentation.Main
+
+2. ĐĂNG KÝ TÀI KHOẢN KHÁCH HÀNG
+   ===== HỆ THỐNG CYBER GAMING VÀ DỊCH VỤ F&B =====
+   1. Đăng ký: 
+   2. Đăng nhập
+   0. Thoát chương trình
+   Nhập lựa chọn của bạn: 1
+   
+   Nhập username: customer1
+   Nhập password: 123456
+   Nhập vai trò(admin/quản trị viên)/staff(Nhân viên)/customer(Khách hàng): customer
+   Đăng ký thành công
+
+3. ĐĂNG NHẬP
+   ===== HỆ THỐNG CYBER GAMING VÀ DỊCH VỤ F&B =====
+   1. Đăng ký: 
+   2. Đăng nhập
+   0. Thoát chương trình
+   Nhập lựa chọn của bạn: 2
+   
+   Nhập tên đăng nhập: customer1
+   Nhập mật khẩu: 123456
+   Đăng nhập thành công
+
+4. MENU KHÁCH HÀNG
+   ===== MENU KHÁCH HÀNG =====
+   1. Xem máy trống
+   2. Đặt máy
+   3. Gọi đồ ăn
+   0. Đăng xuất
+   Chọn: 1
+
+5. XEM MÁY TRỐNG THEO KHU VỰC
+   Nhập id khu vực (1=Standard,2=VIP): 1
+   Thời gian bắt đầu (yyyy-mm-dd hh:mm:ss): 2026-03-27 14:00:00
+   Thời gian kết thúc (yyyy-mm-dd hh:mm:ss): 2026-03-27 16:00:00
+   
+   [SQL Query chạy ngầm]
+   SELECT * FROM pcs p
+   WHERE p.category_id = 1
+   AND p.status = 'available'
+   AND p.id NOT IN (
+       SELECT pc_id FROM bookings
+       WHERE status IN ('pending','confirmed','serving')
+       AND NOT (
+           '2026-03-27 16:00:00' <= start_time
+           OR
+           '2026-03-27 14:00:00' >= end_time
+       )
+   )
+   
+   Danh sách máy trống:
+   1 - PC001
+   3 - PC003
+   5 - PC005
+
+6. ĐẶT MÁY
+   ===== MENU KHÁCH HÀNG =====
+   1. Xem máy trống
+   2. Đặt máy
+   3. Gọi đồ ăn
+   0. Đăng xuất
+   Chọn: 2
+   
+   ID máy: 1
+   Thời gian bắt đầu: 2026-03-27 14:00:00
+   Thời gian kết thúc: 2026-03-27 16:00:00
+   
+   [Logic kiểm tra]
+   - Máy tồn tại: ✓
+   - Trạng thái 'available': ✓
+   - Định dạng thời gian: ✓
+   - Thời gian hợp lệ: ✓
+   - Kiểm tra trùng lịch: hasTimeConflict(1, 14:00, 16:00)
+   
+   [SQL Query kiểm tra trùng lịch]
+   SELECT COUNT(*) FROM bookings
+   WHERE pc_id = 1
+   AND status IN ('pending', 'confirmed', 'serving')
+   AND NOT ('2026-03-27 16:00:00' <= start_time OR '2026-03-27 14:00:00' >= end_time)
+   
+   [SQL Query tạo booking]
+   INSERT INTO bookings (user_id, pc_id, start_time, end_time, status, total_cost)
+   SELECT 1, 1, '2026-03-27 14:00:00', '2026-03-27 16:00:00', 'pending', 0
+   WHERE NOT EXISTS (
+       SELECT 1 FROM bookings
+       WHERE pc_id = 1
+       AND status IN ('pending', 'confirmed', 'serving')
+       AND NOT ('2026-03-27 16:00:00' <= start_time OR '2026-03-27 14:00:00' >= end_time)
+   )
+   
+   Đặt máy thành công. BookingID=123
+
+7. GỌI ĐỒ ĂN/UỐNG
+   ===== MENU KHÁCH HÀNG =====
+   1. Xem máy trống
+   2. Đặt máy
+   3. Gọi đồ ăn
+   0. Đăng xuất
+   Chọn: 3
+   
+   Booking của bạn:
+   BookingID=123 | PC=1 | 2026-03-27T14:00 -> 2026-03-27T16:00
+   
+   Menu món ăn/uống:
+   1 - Coca Cola | Giá=15000.0 | Tồn=50
+   2 - Bim Bim | Giá=12000.0 | Tồn=30
+   3 - Mì Gói | Giá=25000.0 | Tồn=20
+   4 - Cà Phê | Giá=20000.0 | Tồn=40
+   
+   Booking ID: 123
+   Food ID: 1
+   Số lượng: 2
+   
+   [Logic kiểm tra]
+   - Số lượng > 0: ✓
+   - Booking tồn tại: ✓
+   - Booking của user này: ✓
+   - Food tồn tại: ✓
+   - Tồn kho đủ (50 >= 2): ✓
+   - Giữ tồn kho thành công: ✓
+   
+   [SQL Query tạo order]
+   INSERT INTO orders (booking_id, food_id, quantity, total_price)
+   VALUES (123, 1, 2, 30000.0)
+   
+   Đã gửi yêu cầu món ăn
+
+8. THỬ TRÙNG LỊCH (PHẦN QUAN TRỌNG)
+   ===== MENU KHÁCH HÀNG =====
+   1. Xem máy trống
+   2. Đặt máy
+   3. Gọi đồ ăn
+   0. Đăng xuất
+   Chọn: 2
+   
+   ID máy: 1
+   Thời gian bắt đầu: 2026-03-27 15:00:00
+   Thời gian kết thúc: 2026-03-27 17:00:00
+   
+   [Logic kiểm tra trùng lịch]
+   - hasTimeConflict(1, 15:00, 17:00) = true
+   - Vì có booking từ 14:00-16:00
+   
+   Máy đã được đặt trong khung giờ này
+   Đặt máy thất bại
+
+9. ĐĂNG XUẤT
+   ===== MENU KHÁCH HÀNG =====
+   1. Xem máy trống
+   2. Đặt máy
+   3. Gọi đồ ăn
+   0. Đăng xuất
+   Chọn: 0
+   
+   Đăng xuất...
+
+===== TỔNG KẾT =====
+✅ 3 chức năng chính hoạt động hoàn chỉnh:
+1. Xem máy trống theo khu vực + thời gian
+2. Đặt máy với kiểm tra chống trùng lịch
+3. Đặt đồ ăn kèm theo booking
+
+✅ Logic chống trùng lịch hoạt động ở 3 lớp:
+- UI: Không hiển thị máy đã đặt
+- Service: Kiểm tra trước khi đặt
+- Database: SQL NOT EXISTS đảm bảo
+
+✅ Khách hàng có thể "lên đơn" đầy đủ qua console
